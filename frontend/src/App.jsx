@@ -1,74 +1,86 @@
 import React, { useCallback, useState } from 'react'
 import { addEdge, applyNodeChanges, Background, Controls, Handle, Position, ReactFlow } from '@xyflow/react';
-
 import '@xyflow/react/dist/style.css';
-import { ColdEmailNode, LeadSourceNode, WaitDelayNode } from './CustomNodes';
+import { ColdEmailNode, WaitDelayNode, LeadSourceNode } from "./CustomNodes"
+import { saveFlow, sendEmail, scheduleEmail } from './services/api.js';
+import useFlowStore from './store/useFlowStore.js';
+import { findStartNode } from './utils/flowUtil.js';
+import { executeFlow } from './utils/flowExecutor.js';
 
-const CustomNode = ({ data }) => {
-  const [label, setLabel] = useState(data.label);
+const handleSave = async () => {
+  const nodes = useFlowStore.getState().nodes;
+  const edges = useFlowStore.getState().edges;
+  try {
+    const res = await saveFlow(nodes, edges);
+    alert(res.message);
+  } catch (err) {
+    alert("Error saving flow");
+  }
+};
 
-  return (
-    <div
-      onDoubleClick={() => {
-        const newLabel = prompt("Edit Node Label:", label);
-        if (newLabel !== null) setLabel(newLabel);
-      }}
-      className='p-3 bg-blue-200 border border-gray-500 rounded-md text-center cursor-pointer'
-    >
-      {label}
-      <Handle type="source" position={Position.Right} />
-      <Handle type="target" position={Position.Left} />
-    </div>
-  )
-}
+const handleSend = async () => {
+  const email = prompt("Recipient Email:");
+  const subject = prompt("Email Subject:");
+  const body = prompt("Email Body:");
+  if (email && subject && body) {
+    const res = await sendEmail(email, subject, body);
+    alert(res.message);
+  }
+};
+
+const handleSchedule = async () => {
+  const email = prompt("Recipient Email:");
+  const subject = prompt("Email Subject:");
+  const body = prompt("Email Body:");
+  const delay = prompt("Delay (e.g. 'in 5 minutes', 'in 1 hour'):");
+  if (email && subject && body && delay) {
+    const res = await scheduleEmail(email, subject, body, delay);
+    alert(res.message);
+  }
+};
+
+
+const handleRunFlow = async () => {
+  const { nodes, edges } = useFlowStore.getState();
+  const start = findStartNode(nodes, edges);
+  if (!start) return alert("❌ No starting node found!");
+
+  await executeFlow(start, nodes, edges);
+};
 
 
 const nodeTypes = {
-  custom: CustomNode,
+  coldEmail: ColdEmailNode,
+  waitDelay: WaitDelayNode,
+  leadSource: LeadSourceNode,
 };
 
+
 const App = () => {
-  const [nodes, setNodes] = useState([
-    {
-      id: "1",
-      type: "custom",
-      data: { label: "Initial Node" },
-      position: { x: 200, y: 200 }, // Ensure position exists
-    }
-  ]);
-  const [edges, setEdges] = useState([]);
+  const {
+    nodes,
+    edges,
+    addNode,
+    onNodesChange,
+    onConnect,
+  } = useFlowStore();
 
-  const onConnect = useCallback((params) => setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: "#555" } }, eds)),
-    [setEdges]
-  );
-
-  const onNodesChange = useCallback(
-    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
-    []
-  )
-
-  const addNode = (type) => {
-    const id = `${nodes.length + 1}`;
-    const newNode = {
-      id,
-      type: "custom",
-      data: { label: `${type} ${id}` },
-      position: { x: 100, y: 100 },
-    };
-    setNodes((nds) => [...nds, newNode]);
-  }
   return (
-    <div className='w-screen h-screen flex'>
-
+    <div className="w-screen h-screen flex">
       {/* Sidebar */}
-      <div className='w-1/8 p-10 bg-gray-500'>
-        <button onClick={() => addNode("coldEmail")}>Add Cold Email</button>
-        <button onClick={() => addNode("waitDelay")}>Add Wait/Delay</button>
-        <button onClick={() => addNode("leadSource")}>Add Lead Source</button>
+      <div data-testid="sidebar" className="w-1/8 p-10 bg-gray-500 space-y-4">
+        <button onClick={() => addNode("Cold Email")}>Add Cold Email</button>
+        <button onClick={() => addNode("Wait/Delay")}>Add Wait/Delay</button>
+        <button onClick={() => addNode("Lead Source")}>Add Lead Source</button>
+        <hr />
+        <button onClick={handleSave}>💾 Save Flow</button>
+        <button onClick={handleSend}>📤 Send Email</button>
+        <button onClick={handleSchedule}>🕒 Schedule Email</button>
+        <button onClick={handleRunFlow}>⚙️ Run Flow</button>
       </div>
 
       {/* Canvas */}
-      <div className='w-7/8'>
+      <div data-testid="flow-canvas" className="w-7/8">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -81,7 +93,7 @@ const App = () => {
         </ReactFlow>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
