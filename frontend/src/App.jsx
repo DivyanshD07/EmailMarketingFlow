@@ -43,7 +43,7 @@ const handleSchedule = async () => {
 const handleRunFlow = async () => {
   const { nodes, edges } = useFlowStore.getState();
   const start = findStartNode(nodes, edges);
-  if (!start) return alert("❌ No starting node found!");
+  if (!start) return alert("No starting node found!");
 
   await executeFlow(start, nodes, edges);
 };
@@ -68,19 +68,19 @@ const App = () => {
   return (
     <div className="w-screen h-screen flex">
       {/* Sidebar */}
-      <div data-testid="sidebar" className="w-1/8 p-10 bg-gray-500 space-y-4">
-        <button onClick={() => addNode("Cold Email")}>Add Cold Email</button>
-        <button onClick={() => addNode("Wait/Delay")}>Add Wait/Delay</button>
-        <button onClick={() => addNode("Lead Source")}>Add Lead Source</button>
+      <div data-testid="sidebar" className="w-2/8 p-10 bg-gray-500 space-y-4">
+        <button className='border-2 border-black w-full' onClick={() => addNode("Cold Email")}>Add Cold Email</button>
+        <button className='border-2 border-black' onClick={() => addNode("Wait/Delay")}>Add Wait/Delay</button>
+        <button className='border-2 border-black' onClick={() => addNode("Lead Source")}>Add Lead Source</button>
         <hr />
-        <button onClick={handleSave}>💾 Save Flow</button>
-        <button onClick={handleSend}>📤 Send Email</button>
-        <button onClick={handleSchedule}>🕒 Schedule Email</button>
-        <button onClick={handleRunFlow}>⚙️ Run Flow</button>
+        <button className='border-2 border-black' onClick={handleSave}>Save Flow</button>
+        <button className='border-2 border-black' onClick={handleSend}>Send Email</button>
+        <button className='border-2 border-black' onClick={handleSchedule}>Schedule Email</button>
+        <button className='border-2 border-black' onClick={handleRunFlow}>Run Flow</button>
       </div>
 
       {/* Canvas */}
-      <div data-testid="flow-canvas" className="w-7/8">
+      <div data-testid="flow-canvas" className="w-6/8">
         <ReactFlow
           nodes={nodes}
           edges={edges}

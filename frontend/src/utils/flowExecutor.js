@@ -18,7 +18,7 @@ export const executeFlow = async (startNode, nodes, edges) => {
         const subject = prompt("Email Subject:");
         const body = prompt("Email Body:");
         if (!email || !subject || !body) {
-          alert("❌ Email details are required.");
+          alert("Email details are required.");
           return;
         }
         await sendEmail(email, subject, body);
@@ -28,24 +28,24 @@ export const executeFlow = async (startNode, nodes, edges) => {
         const subject = prompt("Subject:");
         const body = prompt("Body:");
         if (!delay || !email || !subject || !body) {
-          alert("❌ All delay and email fields are required.");
+          alert("All delay and email fields are required.");
           return;
         }
         await scheduleEmail(email, subject, body, delay);
       } else if (label.includes("lead source")) {
-        alert("📥 Lead Source node reached. (Assume it's a lead entry point)");
+        alert("Lead Source node reached. (Assume it's a lead entry point)");
       } else {
-        console.log("🛑 Unknown node type:", label);
+        console.log("Unknown node type:", label);
         alert("Unknown node type encountered.");
       }
     } catch (error) {
       console.error("Error executing node:", error);
-      alert("⚠️ Failed to execute this node.");
+      alert("Failed to execute this node.");
       return;
     }
 
     if (!nextNode) {
-      alert("✅ Flow completed! No more nodes connected.");
+      alert("Flow completed! No more nodes connected.");
       return;
     }
 

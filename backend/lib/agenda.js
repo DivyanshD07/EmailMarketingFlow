@@ -5,10 +5,10 @@ const agenda = new Agenda({ db: { address: process.env.MONGODB_URI } });
 
 agenda.define("send email", async (job) => {
   const { email, subject, body } = job.attrs.data;
-  console.log("📅 Sending scheduled email to:", email);
+  console.log("Sending scheduled email to:", email);
   await sendEmail(email, subject, body);
 });
 
-await agenda.start(); // Don't forget to start agenda
+await agenda.start();
 
 export default agenda;
